@@ -1,0 +1,8 @@
+.venv/
+# Left over only from versions before native-focus mode; current code never reads it.
+chrome-profile/
+__pycache__/
+*.pyc
+build/
+dist/
+*.spec

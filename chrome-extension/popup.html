@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>717study.com 打字机</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <header><h1>717study.com 打字机</h1><span>当前标签页</span></header>
+  <label class="file">导入 TXT / MD / DOCX<input id="file" type="file" accept=".txt,.md,.docx"></label>
+  <textarea id="text" placeholder="粘贴或导入文本…"></textarea>
+  <div id="importNote" class="note"></div>
+  <section class="estimate">
+    <div><span>有效字数</span><strong id="charCount">0</strong></div>
+    <div><span>总字符</span><strong id="totalCount">0</strong></div>
+    <div class="time"><span>预计完成时间</span><strong id="estimateTime">—</strong><small id="estimateRange">输入文本后计算</small></div>
+  </section>
+  <div class="grid">
+    <label>WPM<input id="wpm" type="number" min="1" max="300" value="45"></label>
+    <label>波动 %<input id="variation" type="number" min="0" max="100" value="25"></label>
+    <label>停顿概率 %<input id="pauseChance" type="number" min="0" max="100" value="3.5" step="0.1"></label>
+    <label>最长停顿 秒<input id="pauseMax" type="number" min="0" max="20" value="1.1" step="0.1"></label>
+    <label>误触概率 %<input id="typoChance" type="number" min="0" max="100" value="1" step="0.1"></label>
+    <label>英文整词概率 %<input id="wordChance" type="number" min="0" max="100" value="70"></label>
+  </div>
+  <button id="load" class="primary">加载到当前页面</button>
+  <p id="status" class="status">只在你点击扩展后临时访问当前页面。</p>
+  <script src="docx.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
