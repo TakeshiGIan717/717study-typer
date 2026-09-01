@@ -1,1 +1,0 @@
-# No third-party runtime dependency. Tkinter and Windows SendInput are built in.
