@@ -1,5 +1,5 @@
 const $=id=>document.getElementById(id);
-const settings=['wpm','variation','pauseChance','pauseMax','typoChance','wordChance'];
+const settings=['wpm','variation','pauseChance','pauseMax','typoChance','wordChance','backspaceChance','backspaceMax','backspacePause','retypeFactor'];
 const fields=['text',...settings];
 chrome.storage.local.get(settings).then(saved=>{settings.forEach(k=>{if(saved[k]!==undefined)$(k).value=saved[k]});updateEstimate()});
 
@@ -29,13 +29,16 @@ function updateEstimate(){
   $('charCount').textContent=effective.toLocaleString();
   $('totalCount').textContent=total.toLocaleString();
   if(!total){$('estimateTime').textContent='—';$('estimateRange').textContent='输入文本后计算';return;}
-  const wpm=Number($('wpm').value),variation=Number($('variation').value)/100,pauseChance=Number($('pauseChance').value)/100,pauseMax=Number($('pauseMax').value),typoChance=Number($('typoChance').value)/100,wordChance=Number($('wordChance').value)/100;
+  const wpm=Number($('wpm').value),variation=Number($('variation').value)/100,pauseChance=Number($('pauseChance').value)/100,pauseMax=Number($('pauseMax').value),typoChance=Number($('typoChance').value)/100,wordChance=Number($('wordChance').value)/100,backspaceChance=Number($('backspaceChance').value)/100,backspaceMax=Number($('backspaceMax').value),backspacePause=Number($('backspacePause').value),retypeFactor=Number($('retypeFactor').value)/100;
   if(!Number.isFinite(wpm)||wpm<=0)return;
   const base=60/(wpm*5),sentence=(text.match(/[.!?。！？\n]/g)||[]).length,comma=(text.match(/[,;:，；：]/g)||[]).length,letters=(text.match(/[A-Za-z]/g)||[]).length;
   const pauseMean=pauseMax>=.25?(.25+pauseMax)/2:.25;
   const core=total*base,punctuation=sentence*.285+comma*.14,pauses=total*pauseChance*pauseMean;
   const typoExtra=letters*(1-wordChance)*typoChance*base*1.2;
-  const expected=core+punctuation+pauses+typoExtra;
+  const averageBackspace=(1+Math.max(1,backspaceMax))/2;
+  const revisionEvents=(text.match(/[A-Za-z]+(?:['’-][A-Za-z]+)*|[^\s]/g)||[]).length*backspaceChance;
+  const revisionExtra=revisionEvents*(backspacePause+averageBackspace*base*(.35+retypeFactor));
+  const expected=core+punctuation+pauses+typoExtra+revisionExtra;
   const randomSpread=Math.sqrt(Math.max(0,total*pauseChance*(1-pauseChance)))*pauseMean*1.65;
   const low=Math.max(core*(1-variation)+punctuation,expected-core*variation-randomSpread);
   const high=expected+core*variation+randomSpread;
@@ -65,7 +68,7 @@ $('load').addEventListener('click',async()=>{
   if(!authenticated){$('status').textContent='请先登录 717study.com';return;}
   const data=Object.fromEntries(fields.map(k=>[k,$(k).value]));
   if(!data.text){$('status').textContent='请先粘贴或导入文本';return;}
-  const checks=[['wpm',1,300,'WPM'],['variation',0,100,'波动'],['pauseChance',0,100,'停顿概率'],['pauseMax',0,20,'最长停顿'],['typoChance',0,100,'误触概率'],['wordChance',0,100,'英文整词概率']];
+  const checks=[['wpm',1,300,'WPM'],['variation',0,100,'波动'],['pauseChance',0,100,'停顿概率'],['pauseMax',0,20,'最长停顿'],['typoChance',0,100,'误触概率'],['wordChance',0,100,'英文整词概率'],['backspaceChance',0,100,'主动回删概率'],['backspaceMax',1,20,'最多回删字符'],['backspacePause',0,10,'回删前停顿'],['retypeFactor',10,200,'重打间隔倍率']];
   for(const [key,min,max,label] of checks){const value=Number(data[key]);if(!Number.isFinite(value)||value<min||value>max){$('status').textContent=`${label} 必须在 ${min}–${max} 之间`;return;}}
   const [tab]=await chrome.tabs.query({active:true,currentWindow:true});
   if(!tab?.id){$('status').textContent='找不到当前标签页';return;}

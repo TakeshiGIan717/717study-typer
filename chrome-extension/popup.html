@@ -27,6 +27,10 @@
     <label>最长停顿 秒<input id="pauseMax" type="number" min="0" max="20" value="1.1" step="0.1"></label>
     <label>误触概率 %<input id="typoChance" type="number" min="0" max="100" value="1" step="0.1"></label>
     <label>英文整词概率 %<input id="wordChance" type="number" min="0" max="100" value="70"></label>
+    <label>主动回删概率 %<input id="backspaceChance" type="number" min="0" max="100" value="0.5" step="0.1"></label>
+    <label>最多回删字符<input id="backspaceMax" type="number" min="1" max="20" value="3"></label>
+    <label>回删前停顿 秒<input id="backspacePause" type="number" min="0" max="10" value="0.5" step="0.1"></label>
+    <label>重打间隔倍率 %<input id="retypeFactor" type="number" min="10" max="200" value="80"></label>
   </div>
   <button id="load" class="primary" disabled>登录后加载到当前页面</button>
   <p id="status" class="status">只在你点击扩展后临时访问当前页面。</p>

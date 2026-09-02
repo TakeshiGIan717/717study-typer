@@ -34,10 +34,23 @@
     setStatus('正在验证 717study.com 登录状态…');
     const auth=await chrome.runtime.sendMessage({type:'AUTH_CHECK'}).catch(()=>({loggedIn:false}));
     if(!auth?.loggedIn){setStatus('请先登录 717study.com 后再使用');return;}
-    running=true;stopped=false;paused=false;const c={wpm:+payload.wpm,variation:+payload.variation/100,pauseChance:+payload.pauseChance/100,pauseMax:+payload.pauseMax,typoChance:+payload.typoChance/100,wordChance:+payload.wordChance/100};
+    running=true;stopped=false;paused=false;const c={wpm:+payload.wpm,variation:+payload.variation/100,pauseChance:+payload.pauseChance/100,pauseMax:+payload.pauseMax,typoChance:+payload.typoChance/100,wordChance:+payload.wordChance/100,backspaceChance:+payload.backspaceChance/100,backspaceMax:+payload.backspaceMax,backspacePause:+payload.backspacePause,retypeFactor:+payload.retypeFactor/100};
     try{if(protocolMode)await chrome.runtime.sendMessage({type:'DEBUG_ATTACH'});}catch(error){running=false;setStatus(`当前页面输入通道连接失败：${error.message}`);return;}
     const tokens=payload.text.match(/[A-Za-z]+(?:['’-][A-Za-z]+)*|[^]/g)||[];let done=0;setStatus('输入中…');
-    try{for(const token of tokens){if(stopped)break;if(token.length>1&&Math.random()<c.wordChance){await insert(token);for(const ch of token)if(!await wait(delay(ch,c)))break;}else for(const ch of token){if(/[A-Za-z]/.test(ch)&&Math.random()<c.typoChance){const letters='abcdefghijklmnopqrstuvwxyz'.replace(ch.toLowerCase(),'');const wrong=letters[Math.floor(Math.random()*letters.length)];await insert(ch===ch.toUpperCase()?wrong.toUpperCase():wrong);if(!await wait(delay(ch,c)*.7))break;await backspace();if(!await wait(delay(ch,c)*.5))break;}await insert(ch);if(!await wait(delay(ch,c)))break;}done+=token.length;if(done%20<token.length)setStatus(`输入中：${done}/${payload.text.length}`)}}catch(error){stopped=true;setStatus(`输入失败：${error.message}`)}
+    try{for(const token of tokens){
+      if(stopped)break;
+      if(token.length>1&&Math.random()<c.wordChance){await insert(token);for(const ch of token)if(!await wait(delay(ch,c)))break;}
+      else for(const ch of token){if(/[A-Za-z]/.test(ch)&&Math.random()<c.typoChance){const letters='abcdefghijklmnopqrstuvwxyz'.replace(ch.toLowerCase(),'');const wrong=letters[Math.floor(Math.random()*letters.length)];await insert(ch===ch.toUpperCase()?wrong.toUpperCase():wrong);if(!await wait(delay(ch,c)*.7))break;await backspace();if(!await wait(delay(ch,c)*.5))break;}await insert(ch);if(!await wait(delay(ch,c)))break;}
+      const chars=Array.from(token);
+      if(!stopped&&/\S/.test(token)&&Math.random()<c.backspaceChance){
+        const count=1+Math.floor(Math.random()*Math.min(c.backspaceMax,chars.length)),redo=chars.slice(-count);
+        setStatus(`模拟回删 ${count} 个字符…`);
+        if(!await wait(c.backspacePause*1000*(.7+Math.random()*.6)))break;
+        for(let i=0;i<count;i++){await backspace();if(!await wait(delay('x',c)*.35))break;}
+        for(const ch of redo){await insert(ch);if(!await wait(delay(ch,c)*c.retypeFactor))break;}
+      }
+      done+=token.length;if(done%20<token.length)setStatus(`输入中：${done}/${payload.text.length}`)
+    }}catch(error){stopped=true;setStatus(`输入失败：${error.message}`)}
     if(protocolMode)await chrome.runtime.sendMessage({type:'DEBUG_DETACH'}).catch(()=>{});
     running=false;if(!status.textContent.startsWith('输入失败'))setStatus(stopped?'输入已停止':'输入完成');
   };
