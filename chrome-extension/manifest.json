@@ -1,9 +1,10 @@
 {
   "manifest_version": 3,
   "name": "717study.com 打字机",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "在用户主动选择的网页输入框中按可配置节奏输入本地文本或 DOCX 内容。",
   "permissions": ["activeTab", "scripting", "storage", "debugger"],
+  "host_permissions": ["https://www.717study.com/*"],
   "background": {
     "service_worker": "service-worker.js"
   },

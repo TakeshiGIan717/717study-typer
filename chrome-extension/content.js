@@ -31,6 +31,9 @@
   function delay(ch,c){let d=60000/(c.wpm*5),v=c.variation;d*=1-v+Math.random()*2*v;if(/[.!?。！？\n]/.test(ch))d+=120+Math.random()*330;else if(/[,;:，；：]/.test(ch))d+=60+Math.random()*160;if(Math.random()<c.pauseChance)d+=250+Math.random()*Math.max(0,c.pauseMax*1000-250);return Math.max(5,d)}
   root.querySelector('.start').onclick=async()=>{
     if(running){setStatus('输入任务正在运行');return}if(!target||!target.isConnected){setStatus('请先选择输入框');return}if(!payload?.text)return;
+    setStatus('正在验证 717study.com 登录状态…');
+    const auth=await chrome.runtime.sendMessage({type:'AUTH_CHECK'}).catch(()=>({loggedIn:false}));
+    if(!auth?.loggedIn){setStatus('请先登录 717study.com 后再使用');return;}
     running=true;stopped=false;paused=false;const c={wpm:+payload.wpm,variation:+payload.variation/100,pauseChance:+payload.pauseChance/100,pauseMax:+payload.pauseMax,typoChance:+payload.typoChance/100,wordChance:+payload.wordChance/100};
     try{if(protocolMode)await chrome.runtime.sendMessage({type:'DEBUG_ATTACH'});}catch(error){running=false;setStatus(`当前页面输入通道连接失败：${error.message}`);return;}
     const tokens=payload.text.match(/[A-Za-z]+(?:['’-][A-Za-z]+)*|[^]/g)||[];let done=0;setStatus('输入中…');

@@ -3,6 +3,19 @@ const settings=['wpm','variation','pauseChance','pauseMax','typoChance','wordCha
 const fields=['text',...settings];
 chrome.storage.local.get(settings).then(saved=>{settings.forEach(k=>{if(saved[k]!==undefined)$(k).value=saved[k]});updateEstimate()});
 
+let authenticated=false;
+async function checkAuth(){
+  authenticated=false;$('load').disabled=true;$('load').textContent='正在检查登录状态…';
+  $('authStatus').textContent='正在检查 717study.com 登录状态…';$('login').hidden=true;$('authBox').classList.remove('ok');
+  try{const result=await chrome.runtime.sendMessage({type:'AUTH_CHECK'});authenticated=!!result?.loggedIn;}catch{authenticated=false;}
+  $('authStatus').textContent=authenticated?'已登录，可免费使用':'尚未登录 717study.com';
+  $('authBox').classList.toggle('ok',authenticated);$('login').hidden=authenticated;
+  $('load').disabled=!authenticated;$('load').textContent=authenticated?'加载到当前页面':'登录后加载到当前页面';
+}
+$('refreshAuth').addEventListener('click',checkAuth);
+$('login').addEventListener('click',()=>{chrome.tabs.create({url:'https://www.717study.com/#/SignIn'});window.close()});
+checkAuth();
+
 function formatDuration(seconds){
   if(!Number.isFinite(seconds)||seconds<0)return '—';
   seconds=Math.round(seconds);
@@ -49,6 +62,7 @@ $('file').addEventListener('change',async event=>{
 });
 
 $('load').addEventListener('click',async()=>{
+  if(!authenticated){$('status').textContent='请先登录 717study.com';return;}
   const data=Object.fromEntries(fields.map(k=>[k,$(k).value]));
   if(!data.text){$('status').textContent='请先粘贴或导入文本';return;}
   const checks=[['wpm',1,300,'WPM'],['variation',0,100,'波动'],['pauseChance',0,100,'停顿概率'],['pauseMax',0,20,'最长停顿'],['typoChance',0,100,'误触概率'],['wordChance',0,100,'英文整词概率']];

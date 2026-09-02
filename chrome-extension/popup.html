@@ -8,6 +8,10 @@
 </head>
 <body>
   <header><h1>717study.com 打字机</h1><span>当前标签页</span></header>
+  <section class="auth" id="authBox">
+    <div><strong id="authStatus">正在检查 717study.com 登录状态…</strong><small>登录用户可免费使用</small></div>
+    <button id="login" hidden>前往登录</button><button id="refreshAuth">重新检查</button>
+  </section>
   <label class="file">导入 TXT / MD / DOCX<input id="file" type="file" accept=".txt,.md,.docx"></label>
   <textarea id="text" placeholder="粘贴或导入文本…"></textarea>
   <div id="importNote" class="note"></div>
@@ -24,7 +28,7 @@
     <label>误触概率 %<input id="typoChance" type="number" min="0" max="100" value="1" step="0.1"></label>
     <label>英文整词概率 %<input id="wordChance" type="number" min="0" max="100" value="70"></label>
   </div>
-  <button id="load" class="primary">加载到当前页面</button>
+  <button id="load" class="primary" disabled>登录后加载到当前页面</button>
   <p id="status" class="status">只在你点击扩展后临时访问当前页面。</p>
   <script src="docx.js"></script>
   <script src="popup.js"></script>
